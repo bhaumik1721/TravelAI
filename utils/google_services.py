@@ -8,54 +8,29 @@ load_dotenv()
 # Load your API key from environment variables or securely from a config file
 GOOGLE_PLACES_API_KEY =  os.getenv("GOOGLE_PLACES_API_KEY")
 OPEN_WEATHER_API_KEY  =  os.getenv("OPEN_WEATHER_API_KEY")
+from utils.date_utils import get_forecast_dates
 
-# 1. Get Coordinates from City Name (Geocoding API)
-def get_coordinates(city_name):
+
+# 1. Geocoding API
+def get_coordinates(city_name: str):
     url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {"address": city_name, "key": GOOGLE_PLACES_API_KEY}
-    response = requests.get(url, params=params)
-    data = response.json()
+    response = requests.get(url, params=params).json()
 
-    if data['status'] == 'OK' and data['results']: # Add this check
-        location = data['results'][0]['geometry']['location']
-        return location['lat'], location['lng']
-    else:
-        # Improved error handling to provide more specific feedback
-        error_message = data.get('error_message', 'No results found or API error.')
-        print(f"[ERROR] Geocoding error for {city_name}: {error_message}")
-        return None, None
+    if response["status"] == "OK" and response["results"]:
+        loc = response["results"][0]["geometry"]["location"]
+        print(f"[INFO] Coordinates for {city_name}: {loc['lat']}, {loc['lng']}")
+        return loc["lat"], loc["lng"]
+
+    raise ValueError(f"[ERROR] Could not find coordinates for '{city_name}'")
 
 
-
-# 2. Search Places (Nearby Search API)
-def search_places(query, lat, lng, radius=5000):
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-    params = {
-        "location": f"{lat},{lng}",
-        "radius": radius,
-        "keyword": query,
-        "key": GOOGLE_PLACES_API_KEY
-    }
-    response = requests.get(url, params=params)
-    return response.json().get("results", [])
-
-# 3. Get Place Details (Place Details API)
-def get_place_details(place_id):
-    url = "https://maps.googleapis.com/maps/api/place/details/json"
-    params = {
-        "place_id": place_id,
-        "fields": "name,rating,formatted_address,opening_hours,geometry,photos",
-        "key": GOOGLE_PLACES_API_KEY
-    }
-    response = requests.get(url, params=params)
-    return response.json().get("result", {})
-
-# 4. Get Weather Info (Google Weather API or fallback to OpenWeatherMap/other if needed)
-def get_weather(lat, lng, target_dates=None):
+# 2. Weather Info from OpenWeatherMap
+def get_weather(lat: float, lon: float, target_dates=None):
     url = "http://api.openweathermap.org/data/2.5/forecast"
     params = {
         "lat": lat,
-        "lon": lng,
+        "lon": lon,
         "appid": OPEN_WEATHER_API_KEY,
         "units": "metric"
     }
@@ -76,7 +51,6 @@ def get_weather(lat, lng, target_dates=None):
             condition = forecast["weather"][0]["description"]
             temp = forecast["main"]["temp"]
             tip = generate_tip(condition, temp)
-
             simplified.append({
                 "datetime": dt.strftime("%Y-%m-%d %H:%M"),
                 "temp": temp,
@@ -102,38 +76,56 @@ def generate_tip(condition, temp):
     else:
         return "Looks like a pleasant day. Enjoy! 😊"
 
-# 5. Convenience Wrapper to Get All in One Shot
-# ✅ PATCHED google_services.py
 
+# 3. Google Places Search
+def search_places(query, lat, lng, radius=5000):
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+    params = {
+        "location": f"{lat},{lng}",
+        "radius": radius,
+        "keyword": query,
+        "key": GOOGLE_PLACES_API_KEY
+    }
+    res = requests.get(url, params=params)
+    return res.json().get("results", [])
+
+
+# 4. Google Place Details
+def get_place_details(place_id):
+    url = "https://maps.googleapis.com/maps/api/place/details/json"
+    params = {
+        "place_id": place_id,
+        "fields": "name,rating,formatted_address,opening_hours,geometry,photos",
+        "key": GOOGLE_PLACES_API_KEY
+    }
+    res = requests.get(url, params=params)
+    return res.json().get("result", {})
+
+
+# 5. One-call Utility Function
 def fetch_full_city_info(city, query, start_date=None, duration_days=3):
-    from utils.date_utils import get_forecast_dates
-
     lat, lng = get_coordinates(city)
-    print(f"[INFO] Coordinates for {city}: {lat}, {lng}")
 
-    if not lat:
-        return {"places": [], "weather": []}
+    places_raw = search_places(query, lat, lng)
+    print(f"[INFO] Found {len(places_raw)} places for query '{query}'")
 
-    places = search_places(query, lat, lng)
-    print(f"[INFO] Found {len(places)} places for query '{query}'")
-
-    detailed_places = []
-    for p in places[:5]:
+    top_places = []
+    for p in places_raw[:5]:
         try:
-            print(f"🔍 Getting details for: {p.get('name', 'Unnamed')}")
             place_id = p.get("place_id")
-            if not place_id:
-                continue
-            place_details = get_place_details(place_id)
-            detailed_places.append(place_details)
+            print(f"🔍 Getting details for: {p.get('name', 'Unnamed')}")
+            if place_id:
+                top_places.append(get_place_details(place_id))
         except Exception as e:
-            print(f"⚠️ Skipping place due to error: {e}")
-            continue
+            print(f"⚠️ Skipped: {e}")
+
+    forecast_dates = get_forecast_dates(start_date, duration_days)
+    weather = get_weather(lat, lng, forecast_dates)
 
     return {
         "coordinates": {"lat": lat, "lng": lng},
-        "places": detailed_places,
-        "weather": []  # fully removed
+        "places": top_places,
+        "weather": weather
     }
 
 

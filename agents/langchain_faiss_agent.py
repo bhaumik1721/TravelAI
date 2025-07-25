@@ -1,71 +1,69 @@
 # agents/langchain_faiss_agent.py
-
-from agents.langchain_gemini_agent import generate_with_langchain
-from memory.faiss_memory import (
-    load_or_create_vectorstore,
-    store_response,
-    check_for_similar_response
-)
+from dotenv import load_dotenv
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+from utils.google_places import get_places_by_city
 from utils.google_services import fetch_full_city_info
+from utils.date_utils import get_forecast_dates
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from memory.chroma_memory import retrieve_similar_context, add_to_chroma_memory
 
-def process_travel_query(city, query, interests, duration, start_date=None):
-    try:
-        user_query = f"{duration}-day trip to {city} for {interests} on {start_date}"
-        vectorstore = load_or_create_vectorstore()
-        cached = check_for_similar_response(user_query, vectorstore)
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GEMINI_API_KEY")
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",
+    api_key=os.getenv("GEMINI_API_KEY"),
+    temperature=0.7
+)
 
-        if cached:
-            print("📦 Retrieved from FAISS memory:")
-            return cached
+# 🧠 Prompt
+prompt = ChatPromptTemplate.from_template("""
+You are a helpful travel assistant. Based on the following inputs, generate a personalized itinerary.
 
-        # 🚨 Fetch and check city data
-        city_data = fetch_full_city_info(city, query, duration, start_date)
-        print("📊 city_data received:", city_data)
+City: {city}
+User Interests: {interests}
+Trip Duration (days): {duration}
+Top Searched Places: {places}
 
-        if not city_data or "places" not in city_data:
-            return "❌ Could not fetch places or weather for this city."
+Also consider this user's previous preferences:
+{past_memory}
 
-        weather_list = city_data.get("weather", [])
-        places_list = city_data.get("places", [])
+Output a detailed, conversational and fun itinerary.
+""")
 
-        # ✅ Safe weather string
-        if weather_list:
-            weather_str = "\n".join(
-                [f"{w.get('datetime', '')}: {w.get('condition', '')}, {w.get('temp', '')}°C — {w.get('tip', '')}" for w in weather_list]
-            )
-        else:
-            weather_str = "Weather data not available."
+# 🛠️ Chain
+def process_travel_query(city: str, query: str, interests: str, duration: int, places: str) -> str:
+    from langchain_core.runnables import RunnableMap, RunnablePassthrough
 
-        # ✅ Safe places string
-        if places_list:
-            places_str = "\n".join(
-                [f"{p.get('name', '')} - {p.get('vicinity', p.get('formatted_address', 'No address'))}" for p in places_list]
-            )
-        else:
-            places_str = "No places of interest found."
+    user_query = f"{city} trip for {duration} days focused on {interests}"
 
-        print("✅ Final weather_str:", weather_str)
-        print("✅ Final places_str:", places_str)
-        print("✅ Final prompt being sent to Gemini...")
+    # Try to retrieve similar memory
+    memory_context = retrieve_similar_context(user_query)
 
-        # 🔮 Generate final response
-        response = generate_with_langchain(
-            city=city,
-            interests=interests,
-            weather=weather_str,
-            places=places_str,
-            duration=duration
-        )
+    chain = (
+        RunnableMap({
+            "city": RunnablePassthrough(),
+            "query": RunnablePassthrough(),
+            "interests": RunnablePassthrough(),
+            "duration": RunnablePassthrough(),
+            "places": RunnablePassthrough(),
+            "past_memory": lambda x: memory_context or "No prior trips."
+        })
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
 
-        # 🧠 Save in FAISS
-        store_response(user_query, response, vectorstore)
-        return response
+    response = chain.invoke({
+        "city": city,
+        "query": query,
+        "interests": interests,
+        "duration": duration,
+        "places": places
+    })
 
-    except Exception as e:
-        import traceback
-        traceback.print_exc()  # print full error in console
-        return f"❌ Error occurred: {str(e)}"
+    # Save interaction to memory
+    add_to_chroma_memory(user_query, response)
 
-
-
-
+    return response

@@ -4,27 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c57d7ca3-e682-4c12-88e7-ac23a68f3833" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/TravelAI.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/langchain_faiss_agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/langchain_gemini_agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chainlit_app/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chainlit_app/ui.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/memory/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/memory/faiss_memory.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/date_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/google_places.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/google_services.py" afterDir="false" />
+    <list default="true" id="c57d7ca3-e682-4c12-88e7-ac23a68f3833" name="Changes" comment="Travel AI">
+      <change afterPath="$PROJECT_DIR$/memory/chroma_memory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/input_parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/langchain_faiss_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/langchain_faiss_agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/langchain_gemini_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/langchain_gemini_agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chainlit_app/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/chainlit_app/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/memory/faiss_memory.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/date_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/date_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/google_places.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/google_places.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/google_services.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/google_services.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +32,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;bhaumik1721&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/bhaumik1721/TravelAI.git&quot;,
+    &quot;accountId&quot;: &quot;4507b615-1ef6-44ce-a506-35803e1a4015&quot;
+  }
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/main.py" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -61,6 +64,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.chroma_memory.executor": "Run",
     "Python.faiss_memory.executor": "Run",
     "Python.gemini_agent.executor": "Run",
     "Python.google_places.executor": "Run",
@@ -76,6 +80,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "D:/TravelAI",
     "settings.editor.selected.configurable": "terminal"
   },
   "keyToStringList": {
@@ -137,6 +142,15 @@
       <option name="presentableId" value="Default" />
       <updated>1753157831865</updated>
     </task>
+    <task id="LOCAL-00001" summary="Travel AI">
+      <option name="closed" value="true" />
+      <created>1753383317932</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1753383317932</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -149,5 +163,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Travel AI" />
+    <option name="LAST_COMMIT_MESSAGE" value="Travel AI" />
   </component>
 </project>

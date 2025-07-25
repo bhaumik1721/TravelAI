@@ -6,10 +6,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from agents.langchain_faiss_agent import GOOGLE_API_KEY
+
 load_dotenv()
+GOOGLE_API_KEY = os.getenv("GEMINI_API_KEY")
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-pro",  # Use "gemini-1.5-pro" unless you're in Gemini Flash tier
+    model="gemini-1.5-flash",  # Use "gemini-1.5-pro" unless you're in Gemini Flash tier
     api_key=os.getenv("GEMINI_API_KEY"),
     temperature=0.7,
 
